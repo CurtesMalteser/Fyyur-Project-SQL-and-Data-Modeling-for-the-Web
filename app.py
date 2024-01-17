@@ -259,9 +259,16 @@ def delete_venue(venue_id):
 
 #  Artists
 #  ----------------------------------------------------------------
-@app.route('/artists')
+@app.route('/artists', methods=['GET'])
 def artists():
   # TODO: replace with real data returned from querying the database
+  try:
+     artist = Artist.query.with_entities(Artist.id, Artist.name).all()
+     return render_template('pages/artists.html', artists=artist)
+  except:
+     flash('Some error ocurred while fetching artists.')
+     return render_template('pages/artists.html', artists=[])
+
   data=[{
     "id": 4,
     "name": "Guns N Petals",
@@ -272,7 +279,7 @@ def artists():
     "id": 6,
     "name": "The Wild Sax Band",
   }]
-  return render_template('pages/artists.html', artists=data)
+  
 
 @app.route('/artists/search', methods=['POST'])
 def search_artists():

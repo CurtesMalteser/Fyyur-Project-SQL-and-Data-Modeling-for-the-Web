@@ -40,11 +40,11 @@ class Venue(db.Model):
     phone = db.Column(db.String(120))
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
-    website = db.Column(db.String(120))
-    genres = db.Column(db.String(120))
+    website_link = db.Column(db.String(120))
+    genres = db.Column(db.ARRAY(db.String(24)))
     seeking_talent = db.Column(db.Boolean, nullable=False, default=False)
     seeking_description = db.Column(db.String(120))
-    shows = db.relationship('Show', back_populates='venue_shows', lazy=True)
+    shows = db.relationship('Show', back_populates='venues', lazy=True)
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
@@ -56,14 +56,14 @@ class Artist(db.Model):
     city = db.Column(db.String(120))
     state = db.Column(db.String(120))
     phone = db.Column(db.String(120))
-    genres = db.Column(db.String(120))
+    genres = db.Column(db.ARRAY(db.String(120)))
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
-    website = db.Column(db.String(120))
-    genres = db.Column(db.String(120))
+    website_link = db.Column(db.String(120))
+    genres = db.Column(db.String(24))
     seeking_venue = db.Column(db.Boolean, nullable=False, default=False)
     seeking_description = db.Column(db.String(120))
-    shows = db.relationship('Show', back_populates='artist_shows', lazy=True)
+    shows = db.relationship('Show', back_populates='artists', lazy=True)
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
@@ -72,8 +72,8 @@ class Show(db.Model):
    id = db.Column(db.Integer, primary_key=True)
    venue_id = db.Column(db.Integer, db.ForeignKey('Venue.id'), nullable=False)
    artist_id = db.Column(db.Integer, db.ForeignKey('Artist.id'), nullable=False)
-   shows = db.relationship('Artist', back_populates='artists', lazy=True)
-   shows = db.relationship('Venue', back_populates='venues', lazy=True)
+   artists = db.relationship('Artist', back_populates='shows', lazy=True)
+   venues = db.relationship('Venue', back_populates='shows', lazy=True)
    start_time = db.Column(db.DateTime, nullable=False)
 
 #----------------------------------------------------------------------------#
@@ -432,13 +432,35 @@ def create_artist_form():
 @app.route('/artists/create', methods=['POST'])
 def create_artist_submission():
   # called upon submitting the new artist listing form
-  # TODO: insert form data as a new Venue record in the db, instead
+  # TODO: insert form data as a new Artist record in the db, instead
   # TODO: modify data to be the data object returned from db insertion
 
-  # on successful db insert, flash success
-  flash('Artist ' + request.form['name'] + ' was successfully listed!')
-  # TODO: on unsuccessful db insert, flash an error instead.
-  # e.g., flash('An error occurred. Artist ' + data.name + ' could not be listed.')
+  try:
+    artist = Artist(
+      name = request.form['name'],
+      city = request.form['city'],
+      state = request.form['state'],
+      phone = request.form['phone'],
+      genres = request.form.getlist('genres'),
+      image_link = request.form['image_link'],
+      facebook_link = request.form['facebook_link'],
+      website_link = request.form['website_link'],
+      seeking_venue = bool(request.form.get("seeking_venue", False)),
+      seeking_description = request.form['seeking_description']
+      )
+
+    db.session.add(artist)
+    db.session.commit()
+    # on successful db insert, flash success
+    flash('Artist ' + request.form['name'] + ' was successfully listed!')
+  except:
+     # TODO: on unsuccessful db insert, flash an error instead.
+     # e.g., flash('An error occurred. Artist ' + data.name + ' could not be listed.')
+     db.session.rollback()
+     flash('An error occurred. Artist ' + request.form['name'] + ' could not be listed. ')
+  finally:
+     db.session.close() 
+
   return render_template('pages/home.html')
 
 

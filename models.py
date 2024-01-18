@@ -125,5 +125,5 @@ class ArtistUI:
         self.seeking_description = artist_data.seeking_description
         self.past_shows = past_shows
         self.past_shows_count = past_shows_count
-        self.upcoming_shows = list(upcoming_shows)
+        self.upcoming_shows = upcoming_shows
         self.upcoming_shows_count = upcoming_shows_count

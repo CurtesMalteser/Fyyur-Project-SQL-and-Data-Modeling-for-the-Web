@@ -5,14 +5,15 @@
 import json
 import dateutil.parser
 import babel
+import logging
 from flask import Flask, render_template, request, Response, flash, redirect, url_for
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
-import logging
 from logging import Formatter, FileHandler
 from flask_wtf import Form
 from forms import *
 from flask_migrate import Migrate
+from models import *
 #----------------------------------------------------------------------------#
 # App Config.
 #----------------------------------------------------------------------------#
@@ -20,61 +21,11 @@ from flask_migrate import Migrate
 app = Flask(__name__)
 moment = Moment(app)
 app.config.from_object('config')
-db = SQLAlchemy(app)
+
+db.init_app(app)
 
 # TODO: connect to a local postgresql database
 migrate = Migrate(app, db)
-
-#----------------------------------------------------------------------------#
-# Models.
-#----------------------------------------------------------------------------#
-
-class Venue(db.Model):
-    __tablename__ = 'Venue'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    city = db.Column(db.String(120))
-    state = db.Column(db.String(120))
-    address = db.Column(db.String(120))
-    phone = db.Column(db.String(120))
-    image_link = db.Column(db.String(500))
-    facebook_link = db.Column(db.String(120))
-    website_link = db.Column(db.String(120))
-    genres = db.Column(db.ARRAY(db.String(24)))
-    seeking_talent = db.Column(db.Boolean, nullable=False, default=False)
-    seeking_description = db.Column(db.String(120))
-    shows = db.relationship('Show', back_populates='venues', lazy=True)
-
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
-
-class Artist(db.Model):
-    __tablename__ = 'Artist'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    city = db.Column(db.String(120))
-    state = db.Column(db.String(120))
-    phone = db.Column(db.String(120))
-    genres = db.Column(db.ARRAY(db.String(120)))
-    image_link = db.Column(db.String(500))
-    facebook_link = db.Column(db.String(120))
-    website_link = db.Column(db.String(120))
-    genres = db.Column(db.String(24))
-    seeking_venue = db.Column(db.Boolean, nullable=False, default=False)
-    seeking_description = db.Column(db.String(120))
-    shows = db.relationship('Show', back_populates='artists', lazy=True)
-
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
-
-# TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
-class Show(db.Model):
-   id = db.Column(db.Integer, primary_key=True)
-   venue_id = db.Column(db.Integer, db.ForeignKey('Venue.id'), nullable=False)
-   artist_id = db.Column(db.Integer, db.ForeignKey('Artist.id'), nullable=False)
-   artists = db.relationship('Artist', back_populates='shows', lazy=True)
-   venues = db.relationship('Venue', back_populates='shows', lazy=True)
-   start_time = db.Column(db.DateTime, nullable=False)
 
 #----------------------------------------------------------------------------#
 # Filters.
@@ -263,23 +214,11 @@ def delete_venue(venue_id):
 def artists():
   # TODO: replace with real data returned from querying the database
   try:
-     artist = Artist.query.with_entities(Artist.id, Artist.name).all()
-     return render_template('pages/artists.html', artists=artist)
+     artists = Artist.query.with_entities(Artist.id, Artist.name).all()
+     return render_template('pages/artists.html', artists=artists)
   except:
      flash('Some error ocurred while fetching artists.')
      return render_template('pages/artists.html', artists=[])
-
-  data=[{
-    "id": 4,
-    "name": "Guns N Petals",
-  }, {
-    "id": 5,
-    "name": "Matt Quevedo",
-  }, {
-    "id": 6,
-    "name": "The Wild Sax Band",
-  }]
-  
 
 @app.route('/artists/search', methods=['POST'])
 def search_artists():
@@ -300,6 +239,15 @@ def search_artists():
 def show_artist(artist_id):
   # shows the artist page with the given artist_id
   # TODO: replace with real artist data from the artist table, using artist_id
+  try:
+    artist = Artist.query.get(artist_id)
+    artist_ui = ArtistUI(artist_data=artist)
+    return render_template('pages/show_artist.html', artist=artist_ui)
+  except Exception as error :
+     error_msg = 'with this error: {}'.format(error)
+     flash('Some error ocurred while fetching artist with id {} + {}.'.format(artist_id, error_msg))
+     return render_template('pages/show_artist.html', artist=artist)
+
   data1={
     "id": 4,
     "name": "Guns N Petals",
@@ -371,8 +319,6 @@ def show_artist(artist_id):
     "past_shows_count": 0,
     "upcoming_shows_count": 3,
   }
-  data = list(filter(lambda d: d['id'] == artist_id, [data1, data2, data3]))[0]
-  return render_template('pages/show_artist.html', artist=data)
 
 #  Update
 #  ----------------------------------------------------------------

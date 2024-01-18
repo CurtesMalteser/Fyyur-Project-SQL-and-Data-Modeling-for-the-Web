@@ -53,13 +53,25 @@ class Show(db.Model):
    start_time = db.Column(db.DateTime, nullable=False)
 
 
-class ArtistUI(Artist):
+class ArtistUI:
+    id: int
+    name : str
+    city : str
+    state : str
+    phone : str
+    image_link : str
+    facebook_link : str
+    website_link : str
+    seeking_venue : str
+    seeking_description : str
+    genres: list[str]
     past_shows : list[Show]
     upcoming_shows : list[Show]
     past_shows_count: int
     upcoming_shows_count: int
 
-    def __init__(self, artist_data):
+    def __init__(self, artist_data: Artist):
+        self.id = artist_data.id
         self.name = artist_data.name
         self.city = artist_data.city
         self.state = artist_data.state
@@ -70,8 +82,7 @@ class ArtistUI(Artist):
         self.website_link = artist_data.website_link
         self.seeking_venue = artist_data.seeking_venue
         self.seeking_description = artist_data.seeking_description
-        self.shows = artist_data.shows
-        self.past_shows = []
-        self.upcoming_shows = []
-        self.past_shows_count = 0
-        self.upcoming_shows_count = 0
+        self.past_shows = artist_data.shows
+        self.upcoming_shows = artist_data.shows
+        self.past_shows_count = len(list(artist_data.shows))
+        self.upcoming_shows_count = len(list(artist_data.shows))

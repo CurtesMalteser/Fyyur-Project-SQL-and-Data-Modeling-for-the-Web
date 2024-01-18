@@ -1,6 +1,8 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
+import sys
+
 db = SQLAlchemy()
 
 #----------------------------------------------------------------------------#
@@ -59,16 +61,24 @@ class ShowUI:
     venue_id : str
     artist_id : str
     artists : str
-    venues : str
+    artist_image_link: str
+    venues: str
+    venue_name : str
+    venue_image_link: str
     start_time : str
 
     def __init__(self, show: Show):
-        self.id = show
+
+        self.id = show.id
         self.venue_id = show.venue_id
         self.artist_id = show.artist_id
         self.artists = show.artists
+        self.artist_name = show.artists.name
+        self.artist_image_link = show.artists.image_link
         self.venues = show.venues
-        self.start_time = '2024-01-18 17:56:35'#show.start_time
+        self.venue_name = show.venues.name
+        self.venue_image_link = show.venues.image_link
+        self.start_time = show.start_time
 
 
 class MapperShowUI:
@@ -85,7 +95,7 @@ class MapperShowUI:
             (past_shows if show.start_time < datetime.now() else upcoming_shows).append(show)
 
         past_shows = map(lambda show: ShowUI(show), past_shows)   
-        upcoming_shows = map(lambda show: ShowUI(show), upcoming_shows)   
+        upcoming_shows = map(lambda show: ShowUI(show), upcoming_shows)
         return (past_shows, upcoming_shows)
 
 class ArtistUI:
@@ -107,10 +117,9 @@ class ArtistUI:
 
     def __init__(self, artist_data: Artist):
 
-        (past_shows, upcoming_shows)  = MapperShowUI(shows=artist_data.shows).past_shows()
-
-        past_shows_count  = len(list(past_shows))
-        upcoming_shows_count = len(list(upcoming_shows))
+        (past_shows, upcoming_shows) = MapperShowUI(shows=artist_data.shows).past_shows()
+        past_shows = list(map(ShowUI, past_shows))
+        upcoming_shows = list(map(ShowUI, upcoming_shows))
 
         self.id = artist_data.id
         self.name = artist_data.name
@@ -124,6 +133,6 @@ class ArtistUI:
         self.seeking_venue = artist_data.seeking_venue
         self.seeking_description = artist_data.seeking_description
         self.past_shows = past_shows
-        self.past_shows_count = past_shows_count
+        self.past_shows_count = len(past_shows)
         self.upcoming_shows = upcoming_shows
-        self.upcoming_shows_count = upcoming_shows_count
+        self.upcoming_shows_count = len(upcoming_shows)

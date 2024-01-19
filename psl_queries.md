@@ -17,3 +17,6 @@ VALUES('The Musical Hop',
     'We are on the lookout for a local artist to play every two weeks. Please call us.',
     'https://www.themusicalhop.com'
 );
+
+## DELETE ##
+DELETE FROM "Venue" WHERE id=4;

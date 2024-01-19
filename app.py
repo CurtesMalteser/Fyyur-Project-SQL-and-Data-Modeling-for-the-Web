@@ -14,6 +14,7 @@ from flask_wtf import Form
 from forms import *
 from flask_migrate import Migrate
 from models import *
+import sys
 #----------------------------------------------------------------------------#
 # App Config.
 #----------------------------------------------------------------------------#
@@ -249,11 +250,9 @@ def edit_artist_submission(artist_id):
     artist.seeking_venue = bool(request.form.get("seeking_venue", False))
     artist.seeking_description = request.form['seeking_description']
     db.session.commit()
-  except Exception as e:
-     # TODO: on unsuccessful db insert, flash an error instead.
-     # e.g., flash('An error occurred. Artist ' + data.name + ' could not be updated.')
+  except:
      db.session.rollback()
-     flash('An error occurred. Artist ' + request.form['name'] + ' could not be updated. e: {}'.format(e), 'error')
+     flash('An error occurred. Artist ' + request.form['name'] + ' could not be updated.' 'error')
   finally:
      db.session.close() 
 
@@ -285,6 +284,26 @@ def edit_venue(venue_id):
 def edit_venue_submission(venue_id):
   # TODO: take values from the form submitted, and update existing
   # venue record with ID <venue_id> using the new attributes
+  try:
+    venue = Venue.query.get(venue_id)
+    venue.name = request.form['name']
+    venue.city = request.form['city']
+    venue.state = request.form['state']
+    venue.address = request.form['address']
+    venue.phone = request.form['phone']
+    venue.genres = request.form.getlist('genres')
+    venue.image_link = request.form['image_link']
+    venue.facebook_link = request.form['facebook_link']
+    venue.website_link = request.form['website_link']
+    venue.seeking_talent = bool(request.form.get("seeking_talent", False))
+    venue.seeking_description = request.form['seeking_description']
+    db.session.commit()
+  except Exception as e:
+     db.session.rollback()
+     flash('An error occurred. Venue ' + request.form['name'] + ' could not be update.', 'error')
+  finally:
+     db.session.close()
+
   return redirect(url_for('show_venue', venue_id=venue_id))
 
 #  Create Artist

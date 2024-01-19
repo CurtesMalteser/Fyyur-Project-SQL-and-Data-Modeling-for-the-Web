@@ -82,21 +82,25 @@ class ShowUI:
 
 
 class MapperShowUI:
-    shows : list[Show]
+    _shows : list[Show]
 
     def __init__(self, shows):
-        self.shows = shows
+        self._shows = shows
 
-    def past_shows(self) -> (list[ShowUI], list[ShowUI]) :
+    def past_upcoming_shows(self) -> (list[ShowUI], list[ShowUI]) :
 
         past_shows, upcoming_shows = [], []
 
-        for show in self.shows:
+        for show in self._shows:
             (past_shows if show.start_time < datetime.now() else upcoming_shows).append(show)
 
         past_shows = map(lambda show: ShowUI(show), past_shows)   
         upcoming_shows = map(lambda show: ShowUI(show), upcoming_shows)
         return (past_shows, upcoming_shows)
+
+    def shows(self) -> list[ShowUI]:
+        return map(lambda show: ShowUI(show), self._shows)
+
 
 class ArtistUI:
     id: int
@@ -117,7 +121,8 @@ class ArtistUI:
 
     def __init__(self, artist_data: Artist):
 
-        (past_shows, upcoming_shows) = MapperShowUI(shows=artist_data.shows).past_shows()
+        (past_shows, upcoming_shows) = MapperShowUI(shows=artist_data.shows).past_upcoming_shows()
+
         past_shows = list(map(ShowUI, past_shows))
         upcoming_shows = list(map(ShowUI, upcoming_shows))
 

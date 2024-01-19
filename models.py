@@ -1,8 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
-import sys
-
 db = SQLAlchemy()
 
 #----------------------------------------------------------------------------#
@@ -137,6 +135,49 @@ class ArtistUI:
         self.website_link = artist_data.website_link
         self.seeking_venue = artist_data.seeking_venue
         self.seeking_description = artist_data.seeking_description
+        self.past_shows = past_shows
+        self.past_shows_count = len(past_shows)
+        self.upcoming_shows = upcoming_shows
+        self.upcoming_shows_count = len(upcoming_shows)
+
+
+class VenueUI():
+
+    id : int
+    name : str
+    city : str
+    state : str
+    address : str
+    phone : str
+    image_link : str
+    facebook_link : str
+    website_link : str
+    genres : list[str]
+    seeking_talent : bool
+    seeking_description : str
+    past_shows : list [ShowUI]
+    upcoming_shows : list [ShowUI]
+    past_shows_count: int
+    upcoming_shows_count: int
+
+    def __init__(self, venue_data: Venue):
+
+        (past_shows, upcoming_shows) = MapperShowUI(shows=venue_data.shows).past_upcoming_shows()
+
+        past_shows = list(map(ShowUI, past_shows))
+        upcoming_shows = list(map(ShowUI, upcoming_shows))
+
+        self.id = venue_data.id
+        self.name = venue_data.name
+        self.city = venue_data.city
+        self.state = venue_data.state
+        self.phone = venue_data.phone
+        self.genres = venue_data.genres
+        self.image_link = venue_data.image_link
+        self.facebook_link = venue_data.facebook_link
+        self.website_link = venue_data.website_link
+        self.seeking_talent = venue_data.seeking_talent
+        self.seeking_description = venue_data.seeking_description
         self.past_shows = past_shows
         self.past_shows_count = len(past_shows)
         self.upcoming_shows = upcoming_shows

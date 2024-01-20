@@ -194,3 +194,23 @@ class AreaUI():
         self.city = city
         self.state = state
         self.venues = map(lambda data: VenueUI(venue_data=data), venues)
+
+
+class SearchData():
+    id: int
+    name: str
+    num_upcoming_shows: int
+
+    def __init__(self, id, name, num_upcoming_shows):
+        self.id = id
+        self.name = name
+        self.num_upcoming_shows = num_upcoming_shows
+
+
+class SearchUI():
+    count: int
+    data: list[VenueUI]
+
+    def __init__(self, count, data):
+        self.count = count
+        self.data = data

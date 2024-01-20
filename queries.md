@@ -1,9 +1,13 @@
-## SELECT 'all' ##
+# Queries
+
+## psql ##
+
+### SELECT 'all' ###
 * SELECT * FROM "Artist";
 * SELECT * FROM "Venue";
 * SELECT * FROM shows;
 
-## INSERT Venue ##
+### INSERT Venue ###
 INSERT INTO "Venue"(name, city, state, address, phone, image_link, facebook_link, genres, seeking_talent, seeking_description, website_link)
 VALUES('The Musical Hop',
     'San Francisco',
@@ -18,5 +22,8 @@ VALUES('The Musical Hop',
     'https://www.themusicalhop.com'
 );
 
-## DELETE ##
+### DELETE ###
 DELETE FROM "Venue" WHERE id=4;
+
+## SQLAlchemy ##
+Venue.query.filter(Venue.name.contains(search))

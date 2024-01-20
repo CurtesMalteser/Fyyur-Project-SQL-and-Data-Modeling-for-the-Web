@@ -7,7 +7,6 @@ import babel
 import logging
 from flask import Flask, render_template, request, flash, redirect, url_for, abort
 from flask_moment import Moment
-from flask_sqlalchemy import SQLAlchemy
 from logging import Formatter, FileHandler
 from forms import *
 from flask_migrate import Migrate
@@ -87,11 +86,10 @@ def search_venues():
   response = SearchUI(count=0, data=[])
 
   try:
-    response = Venue.query.filter(Venue.name.contains(search))
-  
+    response = Venue.query.filter(Venue.name.ilike('%{}%'.format(search)))
     response = data_to_search_ui(response)
-  except:
-    flash('Some error ocurred while searching results for {}.'.format(search), 'error')
+  except Exception as e:
+    flash('Some error ocurred while searching results for {}.'.format(e), 'error')
 
   return render_template('pages/search_venues.html', results=response, search_term=request.form.get('search_term', ''))
 
@@ -139,12 +137,12 @@ def create_venue_submission():
     db.session.add(venue)
     db.session.commit()
     # on successful db insert, flash success
-    flash('Venue ' + request.form['name'] + ' was successfully listed!')
+    flash('Venue was successfully listed!'.format(request.form['name']))
   except:
      # TODO: on unsuccessful db insert, flash an error instead.
      # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
      db.session.rollback()
-     flash('An error occurred. Venue ' + request.form['name'] + ' could not be listed.', 'error')
+     flash('An error occurred. Venue {} could not be listed.'.format(request.form['name']), 'error')
   finally:
      db.session.close() 
 
@@ -200,7 +198,7 @@ def search_artists():
   response = SearchUI(count=0, data=[])
 
   try:
-    response = Artist.query.filter(Artist.name.contains(search))
+    response = Artist.query.filter(Artist.name.ilike('%{}%'.format(search)))
   
     response = data_to_search_ui(response)
   except:
@@ -264,7 +262,7 @@ def edit_artist_submission(artist_id):
     db.session.commit()
   except:
      db.session.rollback()
-     flash('An error occurred. Artist ' + request.form['name'] + ' could not be updated.' 'error')
+     flash('An error occurred. Artist {} could not be updated.'.format(request.form['name']), 'error')
   finally:
      db.session.close() 
 
@@ -312,7 +310,7 @@ def edit_venue_submission(venue_id):
     db.session.commit()
   except Exception as e:
      db.session.rollback()
-     flash('An error occurred. Venue ' + request.form['name'] + ' could not be update.', 'error')
+     flash('An error occurred. Venue {} could not be update.'.format(request.form['name']), 'error')
   finally:
      db.session.close()
 
@@ -348,12 +346,12 @@ def create_artist_submission():
     db.session.add(artist)
     db.session.commit()
     # on successful db insert, flash success
-    flash('Artist ' + request.form['name'] + ' was successfully listed!')
+    flash('Artist {} was successfully listed!'.format(request.form['name']))
   except:
      # TODO: on unsuccessful db insert, flash an error instead.
      # e.g., flash('An error occurred. Artist ' + data.name + ' could not be listed.')
      db.session.rollback()
-     flash('An error occurred. Artist ' + request.form['name'] + ' could not be listed.', 'error')
+     flash('An error occurred. Artist {} could not be listed.'.format(request.form['name']), 'error')
   finally:
      db.session.close() 
 

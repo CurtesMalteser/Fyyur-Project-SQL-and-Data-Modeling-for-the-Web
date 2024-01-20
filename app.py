@@ -89,18 +89,7 @@ def search_venues():
   try:
     response = Venue.query.filter(Venue.name.contains(search))
   
-    response = map(lambda venue: SearchData(
-      id= venue.id,
-      name= venue.name,
-      num_upcoming_shows= len(list(filter(lambda show: show.start_time > datetime.now(),venue.shows)))
-    ) , response)
-
-    response = list(response)
-
-    response = SearchUI(
-      count = len(response),
-      data=response
-    )
+    response = data_to_search_ui(response)
   except:
     flash('Some error ocurred while searching results for {}.'.format(search), 'error')
 
@@ -190,14 +179,18 @@ def search_artists():
   # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
   # search for "A" should return "Guns N Petals", "Matt Quevado", and "The Wild Sax Band".
   # search for "band" should return "The Wild Sax Band".
-  response={
-    "count": 1,
-    "data": [{
-      "id": 4,
-      "name": "Guns N Petals",
-      "num_upcoming_shows": 0,
-    }]
-  }
+
+  search = request.form.get('search_term')
+
+  response = SearchUI(count=0, data=[])
+
+  try:
+    response = Artist.query.filter(Artist.name.contains(search))
+  
+    response = data_to_search_ui(response)
+  except:
+    flash('Some error ocurred while searching results for {}.'.format(search), 'error')
+
   return render_template('pages/search_artists.html', results=response, search_term=request.form.get('search_term', ''))
 
 @app.route('/artists/<int:artist_id>')
@@ -399,6 +392,26 @@ def create_show_submission():
     db.session.close()
 
   return render_template('pages/home.html')
+
+#  Utils
+#  ----------------------------------------------------------------
+
+# takes Arstist and Venue data as input,
+# returns SearchUI,
+# since the html files expect same data
+def data_to_search_ui(data):
+    data = map(lambda venue: SearchData(
+      id= venue.id,
+      name= venue.name,
+      num_upcoming_shows= len(list(filter(lambda show: show.start_time > datetime.now(),venue.shows)))
+    ) , data)
+
+    data = list(data)
+
+    return SearchUI(
+      count = len(data),
+      data= data
+    )
 
 @app.errorhandler(404)
 def not_found_error(error):

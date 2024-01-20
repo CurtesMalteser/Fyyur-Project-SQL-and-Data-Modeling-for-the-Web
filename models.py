@@ -182,3 +182,15 @@ class VenueUI():
         self.past_shows_count = len(past_shows)
         self.upcoming_shows = upcoming_shows
         self.upcoming_shows_count = len(upcoming_shows)
+
+
+class AreaUI():
+
+    city: str
+    state: str
+    venues : list[VenueUI]
+
+    def __init__(self, city: str, state: str, venues: list[Venue]):
+        self.city = city
+        self.state = state
+        self.venues = map(lambda data: VenueUI(venue_data=data), venues)

@@ -64,27 +64,19 @@ def index():
 def venues():
   # TODO: replace with real venues data.
   #       num_upcoming_shows should be aggregated based on number of upcoming shows per venue.
-  data=[{
-    "city": "San Francisco",
-    "state": "CA",
-    "venues": [{
-      "id": 1,
-      "name": "The Musical Hop",
-      "num_upcoming_shows": 0,
-    }, {
-      "id": 3,
-      "name": "Park Square Live Music & Coffee",
-      "num_upcoming_shows": 1,
-    }]
-  }, {
-    "city": "New York",
-    "state": "NY",
-    "venues": [{
-      "id": 2,
-      "name": "The Dueling Pianos Bar",
-      "num_upcoming_shows": 0,
-    }]
-  }]
+  data: list[AreaUI] = []
+
+  def get_venues_by_city(city):
+    return Venue.query.filter_by(city=city).order_by('id').all()
+
+  try:
+    areas = Venue.query.with_entities(Venue.city, Venue.state).distinct(Venue.city).all()
+
+    data = map(lambda area: AreaUI(city= area.city, state= area.state, venues = get_venues_by_city(area.city)), areas)
+
+  except:
+    flash('Some error ocurred while fetching veues.', 'error')
+
   return render_template('pages/venues.html', areas=data);
 
 @app.route('/venues/search', methods=['POST'])
@@ -319,7 +311,6 @@ def create_artist_submission():
   # called upon submitting the new artist listing form
   # TODO: insert form data as a new Artist record in the db, instead
   # TODO: modify data to be the data object returned from db insertion
-
   try:
     artist = Artist(
       name = request.form['name'],

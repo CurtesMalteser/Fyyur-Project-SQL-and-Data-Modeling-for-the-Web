@@ -5,7 +5,15 @@
 import dateutil.parser
 import babel
 import logging
-from flask import Flask, render_template, request, flash, redirect, url_for, abort
+from flask import (
+  Flask,
+  render_template,
+  request,
+  flash,
+  redirect,
+  url_for,
+  abort
+  )
 from flask_moment import Moment
 from logging import Formatter, FileHandler
 from forms import *

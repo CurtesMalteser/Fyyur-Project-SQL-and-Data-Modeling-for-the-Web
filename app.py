@@ -416,27 +416,31 @@ def create_shows():
 def create_show_submission():
   # called to create new shows in the db, upon submitting new show listing form
   # TODO: insert form data as a new Show record in the db, instead
-  try:
-     show = Show(
-        venue_id = request.form['venue_id'],
-        artist_id = request.form['artist_id'],
-        start_time = request.form['start_time']
-        )
-     db.session.add(show)
-     db.session.commit()
-    # on successful db insert, flash success
-     flash('Show was successfully listed!')
-        
-  # TODO: on unsuccessful db insert, flash an error instead.
-  # e.g., flash('An error occurred. Show could not be listed.')
-  # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
-  except:
-    db.session.rollback()
-    flash('An error occurred while saving the show.', 'error')
-  finally:
-    db.session.close()
+  form = ShowForm(request.form, meta={"csrf": False})
+  if form.validate():
+    try:
+       show = Show(
+          venue_id = form.venue_id.data,
+          artist_id = form.artist_id.data,
+          start_time = form.start_time.data,
+          )
+       db.session.add(show)
+       db.session.commit()
+      # on successful db insert, flash success
+       flash('Show was successfully listed!')
 
-  return render_template('pages/home.html')
+    # TODO: on unsuccessful db insert, flash an error instead.
+    # e.g., flash('An error occurred. Show could not be listed.')
+    # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
+    except:
+      db.session.rollback()
+    finally:
+      db.session.close()
+
+    return render_template('pages/home.html')
+  else:
+    flash_form_error(form=form)
+    return redirect(url_for('create_show_submission'))
 
 #  Utils
 #  ----------------------------------------------------------------

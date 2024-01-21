@@ -151,7 +151,7 @@ class VenueUI():
     phone : str
     image_link : str
     facebook_link : str
-    website_link : str
+    website : str
     genres : list[str]
     seeking_talent : bool
     seeking_description : str
@@ -171,11 +171,12 @@ class VenueUI():
         self.name = venue_data.name
         self.city = venue_data.city
         self.state = venue_data.state
+        self.address = venue_data.address
         self.phone = venue_data.phone
         self.genres = venue_data.genres
         self.image_link = venue_data.image_link
         self.facebook_link = venue_data.facebook_link
-        self.website_link = venue_data.website_link
+        self.website = venue_data.website_link
         self.seeking_talent = venue_data.seeking_talent
         self.seeking_description = venue_data.seeking_description
         self.past_shows = past_shows

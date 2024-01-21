@@ -108,7 +108,7 @@ class ArtistUI:
     phone : str
     image_link : str
     facebook_link : str
-    website_link : str
+    website : str
     seeking_venue : str
     seeking_description : str
     genres: list[str]
@@ -132,7 +132,7 @@ class ArtistUI:
         self.genres = artist_data.genres
         self.image_link = artist_data.image_link
         self.facebook_link = artist_data.facebook_link
-        self.website_link = artist_data.website_link
+        self.website = artist_data.website_link
         self.seeking_venue = artist_data.seeking_venue
         self.seeking_description = artist_data.seeking_description
         self.past_shows = past_shows

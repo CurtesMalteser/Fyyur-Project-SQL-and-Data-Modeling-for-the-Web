@@ -1,7 +1,42 @@
 from datetime import datetime
-from flask_wtf import Form
-from wtforms import StringField, SelectField, SelectMultipleField, DateTimeField, BooleanField
-from wtforms.validators import DataRequired, AnyOf, URL
+from typing import Any
+from flask_wtf import FlaskForm as Form
+from wtforms import (
+    StringField,
+    SelectField,
+    SelectMultipleField,
+    DateTimeField,
+    BooleanField,
+    )
+from wtforms.validators import (
+    DataRequired,
+    URL,
+    Regexp
+    )
+import re
+
+class PhoneValidator():
+    """ Validate phone numbers like:
+    1234567890 - no space
+    123.456.7890 - dot separator
+    123-456-7890 - dash separator
+    123 456 7890 - space separator
+
+    Patterns:
+    000 = [0-9]{3}
+    0000 = [0-9]{4}
+    -.  = ?[-. ]
+
+    Note: (? = optional) - Learn more: https://regex101.com/
+    """
+    _regex = re.compile(r'^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})')
+
+    _validator = Regexp(regex=_regex, message='Invalid phone.')
+
+    def __call__(self) -> Regexp:
+        return self._validator
+
+phone_validator = PhoneValidator()
 
 class ShowForm(Form):
     artist_id = StringField(
@@ -83,8 +118,10 @@ class VenueForm(Form):
         'address', validators=[DataRequired()]
     )
     phone = StringField(
-        'phone'
+        'phone',
+        validators=[phone_validator()]
     )
+
     image_link = StringField(
         'image_link'
     )
@@ -193,8 +230,10 @@ class ArtistForm(Form):
     )
     phone = StringField(
         # TODO implement validation logic for state
-        'phone'
+        'phone',
+        validators=[phone_validator()]
     )
+
     image_link = StringField(
         'image_link'
     )

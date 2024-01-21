@@ -255,30 +255,43 @@ def edit_artist(artist_id):
 def edit_artist_submission(artist_id):
   # TODO: take values from the form submitted, and update existing
   # artist record with ID <artist_id> using the new attributes
-  try:
-    artist = Artist.query.get(artist_id)
-    artist.name = request.form['name']
-    artist.city = request.form['city']
-    artist.state = request.form['state']
-    artist.phone = request.form['phone']
-    artist.genres = request.form.getlist('genres')
-    artist.image_link = request.form['image_link']
-    artist.facebook_link = request.form['facebook_link']
-    artist.website_link = request.form['website_link']
-    artist.seeking_venue = bool(request.form.get("seeking_venue", False))
-    artist.seeking_description = request.form['seeking_description']
-    db.session.commit()
-  except:
-     db.session.rollback()
-     flash('An error occurred. Artist {} could not be updated.'.format(request.form['name']), 'error')
-  finally:
-     db.session.close() 
+  form = ArtistForm(request.form, meta={'csrf': False})
+  if form.validate():
+    try:
+      artist = Artist.query.get(artist_id)
+      artist.name = form.name.data
+      artist.city = form.city.data
+      artist.state = form.state.data
+      artist.phone = form.phone.data
+      artist.genres = form.genres.data
+      artist.image_link = form.image_link.data
+      artist.facebook_link = form.facebook_link.data
+      artist.website_link = form.website_link.data
+      artist.seeking_venue = form.seeking_venue.data
+      artist.seeking_description = form.seeking_description.data
+      db.session.commit()
+    except:
+      db.session.rollback()
+      flash('An error occurred. Artist {} could not be updated.'.format(form.name.data), 'error')
+    finally:
+       db.session.close()
+    return redirect(url_for('show_artist', artist_id=artist_id))
 
-  return redirect(url_for('show_artist', artist_id=artist_id))
+  else:
+    message = []
+    for field, errors in form.errors.items():
+      for error in errors:
+        message.append(f"{field}: {error}")
+    
+    flash('Please fix the following errors: ' + ', '.join(message))
+
+    return redirect(url_for('edit_artist_submission', artist_id=artist_id))
+
+  
 
 @app.route('/venues/<int:venue_id>/edit', methods=['GET'])
 def edit_venue(venue_id):
-  form = VenueForm()
+  form = VenueForm(request.form, meta={'csrf': False})
   # TODO: populate form with values from venue with ID <venue_id>
   try:
     venue = Venue.query.get(venue_id)
@@ -337,33 +350,44 @@ def create_artist_submission():
   # called upon submitting the new artist listing form
   # TODO: insert form data as a new Artist record in the db, instead
   # TODO: modify data to be the data object returned from db insertion
-  try:
-    artist = Artist(
-      name = request.form['name'],
-      city = request.form['city'],
-      state = request.form['state'],
-      phone = request.form['phone'],
-      genres = request.form.getlist('genres'),
-      image_link = request.form['image_link'],
-      facebook_link = request.form['facebook_link'],
-      website_link = request.form['website_link'],
-      seeking_venue = bool(request.form.get("seeking_venue", False)),
-      seeking_description = request.form['seeking_description']
+  form = ArtistForm(request.form, meta={'csrf': False})
+  if form.validate():
+    try:
+      artist = Artist(
+        name = form.name.data,
+        city = form.city.data,
+        state = form.state.data,
+        phone = form.phone.data,
+        genres = form.genres.data,
+        image_link = form.image_link.data,
+        facebook_link = form.facebook_link.data,
+        website_link = form.website_link.data,
+        seeking_venue = form.seeking_venue.data,
+        seeking_description = form.seeking_description.data
       )
 
-    db.session.add(artist)
-    db.session.commit()
-    # on successful db insert, flash success
-    flash('Artist {} was successfully listed!'.format(request.form['name']))
-  except:
-     # TODO: on unsuccessful db insert, flash an error instead.
-     # e.g., flash('An error occurred. Artist ' + data.name + ' could not be listed.')
-     db.session.rollback()
-     flash('An error occurred. Artist {} could not be listed.'.format(request.form['name']), 'error')
-  finally:
-     db.session.close() 
+      db.session.add(artist)
+      db.session.commit()
+      # on successful db insert, flash success
+      flash('Artist {} was successfully listed!'.format(form.name.data))
+    except:
+       # TODO: on unsuccessful db insert, flash an error instead.
+       # e.g., flash('An error occurred. Artist ' + data.name + ' could not be listed.')
+       db.session.rollback()
+       flash('An error occurred. Artist {} could not be listed.'.format(form.name.data), 'error')
+    finally:
+       db.session.close()
 
-  return render_template('pages/home.html')
+    return render_template('pages/home.html')
+  else:
+    message = []
+    for field, errors in form.errors.items():
+      for error in errors:
+        message.append(f"{field}: {error}")
+    
+    flash('Please fix the following errors: ' + ', '.join(message))
+
+    return render_template('forms/new_artist.html', form=form)
 
 
 #  Shows

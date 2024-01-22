@@ -131,28 +131,28 @@ def create_venue_submission():
   if form.validate():
     try:
       venue = Venue(
-        name = request.form['name'],
-        city = request.form['city'],
-        state = request.form['state'],
-        address = request.form['address'],
-        phone = request.form['phone'],
-        genres = request.form.getlist('genres'),
-        image_link = request.form['image_link'],
-        facebook_link = request.form['facebook_link'],
-        website_link = request.form['website_link'],
-        seeking_talent = bool(request.form.get("seeking_talent", False)),
-        seeking_description = request.form['seeking_description']
+        name = form.name.data,
+        city = form.city.data,
+        state = form.state.data,
+        address = form.address.data,
+        phone = form.phone.data,
+        genres = form.genres.data,
+        image_link = form.image_link.data,
+        facebook_link = form.facebook_link.data,
+        website_link = form.website_link.data,
+        seeking_talent = form.seeking_talent.data,
+        seeking_description = form.seeking_description.data
         )
 
       db.session.add(venue)
       db.session.commit()
       # on successful db insert, flash success
-      flash('Venue was successfully listed!'.format(request.form['name']))
+      flash('Venue was successfully listed!'.format(form.name.data))
     except:
       # TODO: on unsuccessful db insert, flash an error instead.
       # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
       db.session.rollback()
-      flash('An error occurred. Venue {} could not be listed.'.format(request.form['name']), 'error')
+      flash('An error occurred. Venue {} could not be listed.'.format(form.name.data), 'error')
     finally:
       db.session.close() 
 
